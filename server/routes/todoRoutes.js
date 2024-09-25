@@ -19,4 +19,6 @@ router.put('/:id', todoController.updateTask);
 // Route to delete a task
 router.delete('/:id', todoController.deleteTask);
 
+router.get('/:id', todoController.getOneTask);
+
 module.exports = router;

@@ -11,11 +11,21 @@ exports.getTasks = (req, res) => {
     });
 };
 
+exports.getOneTask = (req, res) => {
+    const { id } = req.params;
+    db.all('SELECT * FROM todos WHERE userId = ? AND id = ?', [req.userId, id], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ message: 'Failed to retrieve tasks', err });
+        }
+        res.status(200).json(rows);
+    });
+};
+
 // Add a new task
 exports.addTask = (req, res) => {
-    const { task } = req.body;
+    const { task,status } = req.body;
     const id = uuidv4();
-    db.run('INSERT INTO todos (id, userId, task, status) VALUES (?, ?, ?, ?)', [id, req.userId, task, 'pending'], (err) => {
+    db.run('INSERT INTO todos (id, userId, task, status) VALUES (?, ?, ?, ?)', [id, req.userId, task, status], (err) => {
         if (err) {
             return res.status(500).json({ message: 'Failed to add task', err });
         }
@@ -25,11 +35,20 @@ exports.addTask = (req, res) => {
 
 // Update task status
 exports.updateTask = (req, res) => {
-    const { id, status } = req.body;
-    db.run('UPDATE todos SET status = ? WHERE id = ? AND userId = ?', [status, id, req.userId], (err) => {
+    const { status } = req.body;
+    const {id} = req.params;
+
+    db.run('UPDATE todos SET status = ? WHERE id = ?', [status, id], function (err) {
         if (err) {
+           
             return res.status(500).json({ message: 'Failed to update task', err });
         }
+
+        if (this.changes === 0) {
+            // No rows were updated, so the task ID might not exist
+            return res.status(404).json({ message: 'Task not found' });
+        }
+
         res.status(200).json({ message: 'Task updated successfully' });
     });
 };

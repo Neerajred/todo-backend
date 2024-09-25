@@ -26,7 +26,6 @@ exports.updateProfile = (req, res) => {
 // Update user password
 exports.updatePassword = (req, res) => {
     const { oldPassword, newPassword } = req.body;
-
     db.get('SELECT password FROM users WHERE id = ?', [req.userId], (err, user) => {
         if (err || !user) {
             return res.status(404).json({ message: 'User not found' });
